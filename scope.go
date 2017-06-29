@@ -489,6 +489,10 @@ func (scope *Scope) scan(rows *sql.Rows, columns []string, fields []*Field) {
 					resetFields[index] = field
 				}
 
+				if field := scope.db.lookupCustomHandler(field); field != nil {
+					values[index] = field
+				}
+
 				selectedColumnsMap[column] = fieldIndex
 
 				if field.IsNormal {
@@ -499,6 +503,16 @@ func (scope *Scope) scan(rows *sql.Rows, columns []string, fields []*Field) {
 	}
 
 	scope.Err(rows.Scan(values...))
+
+	// store custom handler output in original field
+	for index, _ := range values {
+		if _, ok := values[index].(CustomHandler); ok {
+			if v := reflect.ValueOf(values[index].(CustomHandler).GetValue()); v.IsValid() {
+				field := selectFields[index]
+				field.Field.Set(v)
+			}
+		}
+	}
 
 	for index, field := range resetFields {
 		if v := reflect.ValueOf(values[index]).Elem().Elem(); v.IsValid() {

@@ -74,6 +74,12 @@ func updateCallback(scope *Scope) {
 									fmt.Sprintf("%v = %v", scope.Quote(foreignField.DBName), scope.AddToVars(foreignField.Field.Interface())))
 							}
 						}
+					} else if !field.IsPrimaryKey && field.IsCustom {
+						field.customHandler.SetValue(field.Field.Interface())
+						sqls = append(sqls, fmt.Sprintf("%v = %v", scope.Quote(field.DBName), scope.AddToVars(field.customHandler)))
+					} else if !field.IsPrimaryKey && field.IsCustom {
+						field.customHandler.SetValue(field.Field.Interface())
+						sqls = append(sqls, fmt.Sprintf("%v = %v", scope.Quote(field.DBName), scope.AddToVars(field.customHandler)))
 					}
 				}
 			}

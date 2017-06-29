@@ -19,7 +19,6 @@ func (field *Field) Set(value interface{}) (err error) {
 	if !field.Field.IsValid() {
 		return errors.New("field value not valid")
 	}
-
 	if !field.Field.CanAddr() {
 		return ErrUnaddressable
 	}

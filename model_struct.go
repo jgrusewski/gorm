@@ -75,12 +75,15 @@ type StructField struct {
 	IsNormal        bool
 	IsIgnored       bool
 	IsScanner       bool
+	IsCustom        bool
 	HasDefaultValue bool
 	Tag             reflect.StructTag
 	TagSettings     map[string]string
 	Struct          reflect.StructField
 	IsForeignKey    bool
 	Relationship    *Relationship
+
+	customHandler *customHandler
 }
 
 func (structField *StructField) clone() *StructField {
@@ -188,6 +191,19 @@ func (scope *Scope) GetModelStruct() *ModelStruct {
 				}
 
 				fieldValue := reflect.New(indirectType).Interface()
+				// lookup custom handler for SQL writer
+				for _, handler := range handlers {
+					if handler.typ == fieldStruct.Type {
+						field.IsCustom = true
+						for _, hnd := range handlers {
+							if field.Struct.Type == hnd.typ {
+								field.customHandler = handler
+							}
+						}
+						break
+					}
+				}
+
 				if _, isScanner := fieldValue.(sql.Scanner); isScanner {
 					// is scanner
 					field.IsScanner, field.IsNormal = true, true
