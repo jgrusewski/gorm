@@ -28,6 +28,7 @@ type DB struct {
 	callbacks     *Callback
 	dialect       Dialect
 	singularTable bool
+	handlers      []*customHandler
 }
 
 // Open initialize a new db connection, need to import driver first, e.g:
@@ -711,6 +712,7 @@ func (s *DB) clone() *DB {
 		Value:             s.Value,
 		Error:             s.Error,
 		blockGlobalUpdate: s.blockGlobalUpdate,
+		handlers:          s.handlers,
 	}
 
 	for key, value := range s.values {

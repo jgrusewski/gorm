@@ -93,6 +93,7 @@ func (structField *StructField) clone() *StructField {
 		Names:           structField.Names,
 		IsPrimaryKey:    structField.IsPrimaryKey,
 		IsNormal:        structField.IsNormal,
+		IsCustom:        structField.IsCustom,
 		IsIgnored:       structField.IsIgnored,
 		IsScanner:       structField.IsScanner,
 		HasDefaultValue: structField.HasDefaultValue,
@@ -190,19 +191,15 @@ func (scope *Scope) GetModelStruct() *ModelStruct {
 					indirectType = indirectType.Elem()
 				}
 
-				fieldValue := reflect.New(indirectType).Interface()
 				// lookup custom handler for SQL writer
-				for _, handler := range handlers {
+				for _, handler := range scope.db.handlers {
 					if handler.typ == fieldStruct.Type {
 						field.IsCustom = true
-						for _, hnd := range handlers {
-							if field.Struct.Type == hnd.typ {
-								field.customHandler = handler
-							}
-						}
+						field.customHandler = handler
 						break
 					}
 				}
+				fieldValue := reflect.New(indirectType).Interface()
 
 				if _, isScanner := fieldValue.(sql.Scanner); isScanner {
 					// is scanner

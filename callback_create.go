@@ -64,6 +64,10 @@ func createCallback(scope *Scope) {
 							placeholders = append(placeholders, scope.AddToVars(foreignField.Field.Interface()))
 						}
 					}
+				} else if !field.IsPrimaryKey && field.IsCustom {
+					field.customHandler.SetValue(field.Field.Interface())
+					columns = append(columns, scope.Quote(field.DBName))
+					placeholders = append(placeholders, scope.AddToVars(field.customHandler))
 				}
 			}
 		}
